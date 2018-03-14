@@ -2,21 +2,21 @@
 ![TravisCI build status](https://travis-ci.org/tolleiv/json-exporter.svg?branch=master)
 [![Docker Build Statu](https://img.shields.io/docker/build/tolleiv/json-exporter.svg)](https://hub.docker.com/r/tolleiv/json-exporter/)
 
-This Prometheus exporter operates similar to the Blackbox exporters. It downloads a JSON file and provides a numerical gauge value from within that file.
-Which value to pick is defined through JsonPath.
+This Prometheus exporter operates similar to the Blackbox exporters. It downloads a JSON file and provides numerical gauge values from within that file.
+Which values to pick is defined through JsonPath.
 
 ## Parameters
 
  - `target`: URL / Json-file to download
- - `jsonpath`: the field name to read the value from, this follows the syntax provided by [oliveagle/jsonpath](https://github.com/oliveagle/jsonpath)
+ - `jsonpath`: list of field names to read the value from, this follows the syntax provided by [oliveagle/jsonpath](https://github.com/oliveagle/jsonpath)
 
 ## Docker usage
 
     docker build -t json_exporter .
     docker -d -p 9116:9116 --name json_exporter json_exporter
-   
+
 The related metrics can then be found under:
-   
+
     http://localhost:9116/probe?target=http://validate.jsontest.com/?json=%7B%22key%22:%22value%22%7D&jsonpath=$.parse_time_nanoseconds
 
 ## Prometheus Configuration
@@ -42,11 +42,12 @@ scrape_configs:
       - target_label: __address__
         replacement: 127.0.0.1:9116  # Json exporter.
     metric_relabel_configs:
-      - source_labels: value
-        target_label: parse_time
+    - source_labels: [__name__]
+      regex: (parse_time_nanoseconds)
+      replacement: parse_time
+      target_label: __name__
 
 ```
-
 ## License
 
 MIT License
